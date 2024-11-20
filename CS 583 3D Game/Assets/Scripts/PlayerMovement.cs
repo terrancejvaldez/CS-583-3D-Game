@@ -104,7 +104,7 @@ public class PlayerMovement : MonoBehaviour
 
                     // Attach the ball to the camera (so it moves with the screen)
                     heldBall.transform.SetParent(playerCamera.transform);
-                    heldBall.transform.localPosition = new Vector3(0f, -0.2f, 1f); // Adjusted position (higher on screen)
+                    heldBall.transform.localPosition = new Vector3(0.05f, -0.1f, 0.25f); // Adjusted position (higher on screen)
                     heldBall.transform.localRotation = Quaternion.identity; // Reset rotation
                     heldBall.transform.localScale = new Vector3(5f, 5f, 5f); // Optional: scale down for a better fit
                 }
@@ -118,9 +118,9 @@ public class PlayerMovement : MonoBehaviour
             heldBall.transform.SetParent(null); // Detach from the camera
             ballRigidbody.isKinematic = false; // Enable physics
 
-            // Apply force in the direction the camera is looking
-            Vector3 shootDirection = playerCamera.transform.forward;
-            ballRigidbody.AddForce(shootDirection * shootForce, ForceMode.Impulse); // Shoot the ball
+            // Add arc to the shot
+            Vector3 shootDirection = playerCamera.transform.forward + Vector3.up * 0.5f; // Add upward force for arc
+            ballRigidbody.AddForce(shootDirection.normalized * shootForce, ForceMode.Impulse); // Shoot the ball
 
             // Apply spin for realism
             ballRigidbody.AddTorque(playerCamera.transform.right * 10f, ForceMode.Impulse);
@@ -128,5 +128,4 @@ public class PlayerMovement : MonoBehaviour
             heldBall = null; // Clear the held ball reference
         }
     }
-
 }
