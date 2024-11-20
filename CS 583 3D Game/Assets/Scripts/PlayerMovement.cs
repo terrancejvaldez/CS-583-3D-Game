@@ -16,11 +16,16 @@ public class PlayerMovement : MonoBehaviour
     public float crouchHeight = 1f;
     public float crouchSpeed = 3f;
 
+    public float pickupRange = 2f; // Range to pick up a basketball
+    public Transform holdPoint;   // The position where the basketball is held
+    public float shootForce = 10f; // Force to apply when shooting the ball
+
     private Vector3 moveDirection = Vector3.zero;
     private float rotationX = 0;
     private CharacterController characterController;
 
     private bool canMove = true;
+    private GameObject heldBall = null; // The basketball currently held by the player
 
     void Start()
     {
@@ -30,6 +35,12 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void Update()
+    {
+        HandleMovement();
+        HandlePickupAndShoot();
+    }
+
+    private void HandleMovement()
     {
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
@@ -59,7 +70,6 @@ public class PlayerMovement : MonoBehaviour
             characterController.height = crouchHeight;
             walkSpeed = crouchSpeed;
             runSpeed = crouchSpeed;
-
         }
         else
         {
@@ -78,4 +88,45 @@ public class PlayerMovement : MonoBehaviour
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
         }
     }
+
+    private void HandlePickupAndShoot()
+    {
+        // Check for pickup
+        if (Input.GetKeyDown(KeyCode.E) && heldBall == null)
+        {
+            Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
+            {
+                if (hit.collider.CompareTag("Basketball"))
+                {
+                    heldBall = hit.collider.gameObject;
+                    heldBall.GetComponent<Rigidbody>().isKinematic = true; // Disable physics
+
+                    // Attach the ball to the camera (so it moves with the screen)
+                    heldBall.transform.SetParent(playerCamera.transform);
+                    heldBall.transform.localPosition = new Vector3(0f, -0.2f, 1f); // Adjusted position (higher on screen)
+                    heldBall.transform.localRotation = Quaternion.identity; // Reset rotation
+                    heldBall.transform.localScale = new Vector3(5f, 5f, 5f); // Optional: scale down for a better fit
+                }
+            }
+        }
+
+        // Check for shooting
+        if (Input.GetKeyDown(KeyCode.Space) && heldBall != null)
+        {
+            Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
+            heldBall.transform.SetParent(null); // Detach from the camera
+            ballRigidbody.isKinematic = false; // Enable physics
+
+            // Apply force in the direction the camera is looking
+            Vector3 shootDirection = playerCamera.transform.forward;
+            ballRigidbody.AddForce(shootDirection * shootForce, ForceMode.Impulse); // Shoot the ball
+
+            // Apply spin for realism
+            ballRigidbody.AddTorque(playerCamera.transform.right * 10f, ForceMode.Impulse);
+
+            heldBall = null; // Clear the held ball reference
+        }
+    }
+
 }
