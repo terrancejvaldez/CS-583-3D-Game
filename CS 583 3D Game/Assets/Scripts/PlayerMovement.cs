@@ -6,8 +6,8 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     public Camera playerCamera;
-    public float walkSpeed = 6f;
-    public float runSpeed = 12f;
+    public float walkSpeed = 3f;
+    public float runSpeed = 6f;
     public float jumpPower = 7f;
     public float gravity = 10f;
     public float lookSpeed = 2f;
@@ -74,8 +74,8 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             characterController.height = defaultHeight;
-            walkSpeed = 6f;
-            runSpeed = 12f;
+            walkSpeed = 3f;
+            runSpeed = 6f;
         }
 
         characterController.Move(moveDirection * Time.deltaTime);
@@ -104,9 +104,9 @@ public class PlayerMovement : MonoBehaviour
 
                     // Attach the ball to the camera (so it moves with the screen)
                     heldBall.transform.SetParent(playerCamera.transform);
-                    heldBall.transform.localPosition = new Vector3(0.05f, -0.1f, 0.25f); // Adjusted position (higher on screen)
+                    heldBall.transform.localPosition = new Vector3(0f, -0.1f, 0.3f); // Adjusted position (higher on screen)
                     heldBall.transform.localRotation = Quaternion.identity; // Reset rotation
-                    heldBall.transform.localScale = new Vector3(5f, 5f, 5f); // Optional: scale down for a better fit
+                    heldBall.transform.localScale = new Vector3(7.5f, 7.5f, 7.5f); // Optional: scale down for a better fit
                 }
             }
         }
