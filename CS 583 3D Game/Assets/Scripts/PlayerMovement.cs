@@ -38,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
     {
         HandleMovement();
         HandlePickupAndShoot();
+        UpdateHeldBallPosition(); // Ensure the held ball stays at the holdPoint
     }
 
     private void HandleMovement()
@@ -100,13 +101,9 @@ public class PlayerMovement : MonoBehaviour
                 if (hit.collider.CompareTag("Basketball"))
                 {
                     heldBall = hit.collider.gameObject;
-                    heldBall.GetComponent<Rigidbody>().isKinematic = true; // Disable physics
-
-                    // Attach the ball to the camera (so it moves with the screen)
-                    heldBall.transform.SetParent(playerCamera.transform);
-                    heldBall.transform.localPosition = new Vector3(0f, -0.1f, 0.3f); // Adjusted position (higher on screen)
-                    heldBall.transform.localRotation = Quaternion.identity; // Reset rotation
-                    heldBall.transform.localScale = new Vector3(7.5f, 7.5f, 7.5f); // Optional: scale down for a better fit
+                    Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
+                    ballRigidbody.isKinematic = true; // Disable physics
+                    heldBall.transform.SetParent(null); // Unparent in case it's parented elsewhere
                 }
             }
         }
@@ -115,7 +112,6 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && heldBall != null)
         {
             Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
-            heldBall.transform.SetParent(null); // Detach from the camera
             ballRigidbody.isKinematic = false; // Enable physics
 
             // Add arc to the shot
@@ -126,6 +122,16 @@ public class PlayerMovement : MonoBehaviour
             ballRigidbody.AddTorque(playerCamera.transform.right * 10f, ForceMode.Impulse);
 
             heldBall = null; // Clear the held ball reference
+        }
+    }
+
+    private void UpdateHeldBallPosition()
+    {
+        if (heldBall != null)
+        {
+            // Make the ball follow the holdPoint
+            heldBall.transform.position = holdPoint.position;
+            heldBall.transform.rotation = holdPoint.rotation;
         }
     }
 }
