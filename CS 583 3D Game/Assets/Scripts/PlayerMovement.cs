@@ -16,16 +16,10 @@ public class PlayerMovement : MonoBehaviour
     public float crouchHeight = 1f;
     public float crouchSpeed = 3f;
 
-    public float pickupRange = 2f; // Range to pick up a basketball
-    public Transform holdPoint;   // The position where the basketball is held
-    public float shootForce = 10f; // Force to apply when shooting the ball
-
     private Vector3 moveDirection = Vector3.zero;
     private float rotationX = 0;
     private CharacterController characterController;
-
     private bool canMove = true;
-    private GameObject heldBall = null; // The basketball currently held by the player
 
     void Start()
     {
@@ -37,8 +31,6 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         HandleMovement();
-        HandlePickupAndShoot();
-        UpdateHeldBallPosition(); // Ensure the held ball stays at the holdPoint
     }
 
     private void HandleMovement()
@@ -87,51 +79,6 @@ public class PlayerMovement : MonoBehaviour
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
-        }
-    }
-
-    private void HandlePickupAndShoot()
-    {
-        // Check for pickup
-        if (Input.GetKeyDown(KeyCode.E) && heldBall == null)
-        {
-            Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-            if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
-            {
-                if (hit.collider.CompareTag("Basketball"))
-                {
-                    heldBall = hit.collider.gameObject;
-                    Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
-                    ballRigidbody.isKinematic = true; // Disable physics
-                    heldBall.transform.SetParent(null); // Unparent in case it's parented elsewhere
-                }
-            }
-        }
-
-        // Check for shooting
-        if (Input.GetKeyDown(KeyCode.Space) && heldBall != null)
-        {
-            Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
-            ballRigidbody.isKinematic = false; // Enable physics
-
-            // Add arc to the shot
-            Vector3 shootDirection = playerCamera.transform.forward + Vector3.up * 0.5f; // Add upward force for arc
-            ballRigidbody.AddForce(shootDirection.normalized * shootForce, ForceMode.Impulse); // Shoot the ball
-
-            // Apply spin for realism
-            ballRigidbody.AddTorque(playerCamera.transform.right * 10f, ForceMode.Impulse);
-
-            heldBall = null; // Clear the held ball reference
-        }
-    }
-
-    private void UpdateHeldBallPosition()
-    {
-        if (heldBall != null)
-        {
-            // Make the ball follow the holdPoint
-            heldBall.transform.position = holdPoint.position;
-            heldBall.transform.rotation = holdPoint.rotation;
         }
     }
 }
