@@ -8,32 +8,43 @@ public class ShootingMechanics : MonoBehaviour
     public Camera playerCamera;
     public float pickupRange = 1f; // Range to pick up a basketball
     public Transform holdPoint;   // The position where the basketball is held
-    public float shootForce = 10f; // Force to apply when shooting the ball
+    public float maxShootForce = 10f; // Maximum force to apply when fully charged
+    public float minShootForce = 3f;  // Minimum force to apply
+    public float maxChargeTime = 1f;  // Time to reach maximum charge
     public TextMeshProUGUI interactionText; // TextMeshPro UI for "Press E to Pick Up"
     public Material highlightMaterial; // Material to highlight the basketball
+    public TextMeshProUGUI chargeText; // Optional text for showing charge percentage
 
     private GameObject heldBall = null; // The basketball currently held by the player
     private GameObject highlightedBall = null; // The basketball currently highlighted
     private Material originalMaterial; // To store the original material of the basketball
+    private float chargeTime = 0f; // Time the shoot button is held
+    private bool isCharging = false; // Whether the player is charging the shot
 
     void Start()
     {
         if (interactionText != null)
         {
             interactionText.gameObject.SetActive(false); // Hide the text initially
+            interactionText.gameObject.SetActive(false); // Hide the text initially
+        }
+
+        if (chargeText != null)
+        {
+            chargeText.gameObject.SetActive(false); // Hide the charge text initially
         }
     }
 
     void Update()
     {
         HighlightBasketball();
-        HandlePickupAndShoot();
+        HandlePickup();
+        HandleChargeAndShoot();
         UpdateHeldBallPosition(); // Ensure the held ball stays at the holdPoint
     }
 
     private void HighlightBasketball()
     {
-        // Do not highlight or show text if holding a ball
         if (heldBall != null)
         {
             RemoveHighlight();
@@ -41,10 +52,9 @@ public class ShootingMechanics : MonoBehaviour
             {
                 interactionText.gameObject.SetActive(false); // Hide text
             }
-            return; // Exit early
+            return;
         }
 
-        // Raycast to detect a basketball
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
         {
@@ -52,16 +62,14 @@ public class ShootingMechanics : MonoBehaviour
             {
                 GameObject ball = hit.collider.gameObject;
 
-                // Highlight the basketball if it's not already highlighted
                 if (highlightedBall != ball)
                 {
-                    RemoveHighlight(); // Remove highlight from the previous ball
+                    RemoveHighlight();
 
                     highlightedBall = ball;
-                    originalMaterial = ball.GetComponent<Renderer>().material; // Store the original material
-                    ball.GetComponent<Renderer>().material = highlightMaterial; // Apply the outline material
+                    originalMaterial = ball.GetComponent<Renderer>().material;
+                    ball.GetComponent<Renderer>().material = highlightMaterial;
 
-                    // Show the interaction text
                     if (interactionText != null)
                     {
                         interactionText.gameObject.SetActive(true);
@@ -69,11 +77,10 @@ public class ShootingMechanics : MonoBehaviour
                     }
                 }
 
-                return; // Exit early if a ball is detected
+                return;
             }
         }
 
-        // No basketball detected, remove highlight and hide text
         RemoveHighlight();
         if (interactionText != null)
         {
@@ -85,42 +92,74 @@ public class ShootingMechanics : MonoBehaviour
     {
         if (highlightedBall != null)
         {
-            highlightedBall.GetComponent<Renderer>().material = originalMaterial; // Restore original material
+            highlightedBall.GetComponent<Renderer>().material = originalMaterial;
             highlightedBall = null;
         }
     }
 
-    private void HandlePickupAndShoot()
+    private void HandlePickup()
     {
-        // Check for pickup
         if (Input.GetKeyDown(KeyCode.E) && heldBall == null && highlightedBall != null)
         {
             heldBall = highlightedBall;
             Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
-            ballRigidbody.isKinematic = true; // Disable physics
-            heldBall.transform.SetParent(null); // Unparent in case it's parented elsewhere
+            ballRigidbody.isKinematic = true;
+            heldBall.transform.SetParent(null);
 
-            RemoveHighlight(); // Remove highlight after picking up
+            RemoveHighlight();
             if (interactionText != null)
             {
-                interactionText.gameObject.SetActive(false); // Hide the interaction text
+                interactionText.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void HandleChargeAndShoot()
+    {
+        if (heldBall == null) return;
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            chargeTime = 0f;
+            isCharging = true;
+            if (chargeText != null)
+            {
+                chargeText.gameObject.SetActive(true);
             }
         }
 
-        // Check for shooting
-        if (Input.GetKeyDown(KeyCode.Space) && heldBall != null)
+        if (Input.GetKey(KeyCode.F) && isCharging)
         {
+            chargeTime += Time.deltaTime;
+            chargeTime = Mathf.Clamp(chargeTime, 0f, maxChargeTime);
+
+            if (chargeText != null)
+            {
+                float chargePercentage = (chargeTime / maxChargeTime) * 100f;
+                chargeText.text = $"Charge: {chargePercentage:0}%";
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.F) && isCharging)
+        {
+            float chargeRatio = chargeTime / maxChargeTime;
+            float shootForce = Mathf.Lerp(minShootForce, maxShootForce, chargeRatio);
+
             Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
-            ballRigidbody.isKinematic = false; // Enable physics
+            ballRigidbody.isKinematic = false;
 
-            // Add arc to the shot
-            Vector3 shootDirection = playerCamera.transform.forward + Vector3.up * 0.5f; // Add upward force for arc
-            ballRigidbody.AddForce(shootDirection.normalized * shootForce, ForceMode.Impulse); // Shoot the ball
+            Vector3 shootDirection = playerCamera.transform.forward + Vector3.up * 0.5f;
+            ballRigidbody.AddForce(shootDirection.normalized * shootForce, ForceMode.Impulse);
 
-            // Apply spin for realism
             ballRigidbody.AddTorque(playerCamera.transform.right * 10f, ForceMode.Impulse);
 
-            heldBall = null; // Clear the held ball reference
+            heldBall = null;
+            isCharging = false;
+
+            if (chargeText != null)
+            {
+                chargeText.gameObject.SetActive(false);
+            }
         }
     }
 
@@ -128,7 +167,6 @@ public class ShootingMechanics : MonoBehaviour
     {
         if (heldBall != null)
         {
-            // Make the ball follow the holdPoint
             heldBall.transform.position = holdPoint.position;
             heldBall.transform.rotation = holdPoint.rotation;
         }
