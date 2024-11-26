@@ -1,6 +1,6 @@
 # CS-583-3D-Game 
 Game Name: 3 Point Shootout
-https://drive.google.com/file/d/1p_ZhLoAEA4FVNZJwN60viz7NakG9ky1n/view?usp=sharing
+https://drive.google.com/file/d/1rmwXzp0ik2DjDTbcSfOgCvEMVHhkoA0K/view?usp=sharing
 
 Group Members: Daniel Ha, Michael Zalameda, Jett Morgan, Alan Yin, Ethan Fox, Terrance Valdez
 
