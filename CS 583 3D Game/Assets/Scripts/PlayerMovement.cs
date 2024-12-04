@@ -30,7 +30,10 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        HandleMovement();
+        if (!PauseGame.paused)
+        {
+            HandleMovement();
+        }
     }
 
     private void HandleMovement()

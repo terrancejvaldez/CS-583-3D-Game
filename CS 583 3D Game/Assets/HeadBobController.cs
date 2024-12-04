@@ -24,13 +24,16 @@ public class Headbob : MonoBehaviour
 
     void Update()
     {
-        // Main update loop to handle head bobbing and resetting position.
-        if (!_enable) return;
-        CheckMotion();
-        ResetPosition();
+        if (!PauseGame.paused)
+        {
+            // Main update loop to handle head bobbing and resetting position.
+            if (!_enable) return;
+            CheckMotion();
+            ResetPosition();
 
-        // Optionally remove this line to allow free camera movement:
-        // _camera.LookAt(FocusTarget());
+            // Optionally remove this line to allow free camera movement:
+            // _camera.LookAt(FocusTarget());
+        }
     }
 
 
