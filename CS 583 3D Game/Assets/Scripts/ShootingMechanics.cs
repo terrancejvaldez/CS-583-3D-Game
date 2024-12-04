@@ -52,10 +52,13 @@ public class ShootingMechanics : MonoBehaviour
 
     void Update()
     {
-        HighlightBasketball();
-        HandlePickup();
-        HandleChargeAndShoot();
-        UpdateHeldBallPosition(); // Ensure the held ball stays at the holdPoint
+        if (!PauseGame.paused)
+        {
+            HighlightBasketball();
+            HandlePickup();
+            HandleChargeAndShoot();
+            UpdateHeldBallPosition(); // Ensure the held ball stays at the holdPoint
+        }
     }
 
     private void HighlightBasketball()
