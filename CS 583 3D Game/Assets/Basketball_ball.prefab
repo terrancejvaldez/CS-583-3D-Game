@@ -66,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: d725b45957112f84b9711cac4cff7df5, type: 2}
     - target: {fileID: 919132149155446097, guid: 4fef66b33f88d374dbc278a2531cf79c, type: 3}
       propertyPath: m_Name
-      value: Basketball_ball 1
+      value: Basketball_ball
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4fef66b33f88d374dbc278a2531cf79c, type: 3}
       propertyPath: m_TagString
@@ -155,6 +155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boundaryHitSound: {fileID: 8300000, guid: 51071725e4f9ef747baea379a034a936, type: 3}
+  badMissSound: {fileID: 8300000, guid: d129603a6da735641a55096124439c84, type: 3}
 --- !u!82 &8086761873466338955
 AudioSource:
   m_ObjectHideFlags: 0

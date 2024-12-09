@@ -1,16 +1,18 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class PauseGame : MonoBehaviour
 {
     public GameObject pauseMenu;
+    public GameObject gameOverMenu;
+    public AudioSource crowdCheer; // Audio source for the crowd cheering
     public static bool paused;
 
     void Start()
     {
         pauseMenu.SetActive(false);
+        gameOverMenu.SetActive(false); // Hide game over menu initially
         Cursor.lockState = CursorLockMode.Locked; // Lock the cursor initially
         Cursor.visible = false; // Hide the cursor initially
     }
@@ -62,4 +64,44 @@ public class PauseGame : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
+
+    public void ShowGameOverMenu(int finalScore)
+    {
+        Time.timeScale = 0f; // Freeze time
+        paused = true;
+
+        gameOverMenu.SetActive(true); // Show game over menu
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // Play crowd cheer sound
+        if (crowdCheer != null)
+        {
+            crowdCheer.Play();
+        }
+
+        // Update game over menu with final score
+        var scoreText = gameOverMenu.transform.Find("FinalScoreText").GetComponent<TMPro.TextMeshProUGUI>();
+        if (scoreText != null)
+        {
+            scoreText.text = $"Final Score: {finalScore}";
+        }
+    }
+
+    public void RetryGame()
+    {
+        // Reset Time scale
+        Time.timeScale = 1f;
+
+        // Reset Cursor state for player control
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // Reset the paused state
+        paused = false;
+
+        // Reload the current scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
 }

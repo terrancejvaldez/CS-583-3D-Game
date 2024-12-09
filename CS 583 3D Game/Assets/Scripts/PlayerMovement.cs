@@ -30,11 +30,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (!PauseGame.paused)
+        if (!PauseGame.paused && Cursor.lockState == CursorLockMode.Locked)
         {
             HandleMovement();
         }
     }
+
 
     private void HandleMovement()
     {

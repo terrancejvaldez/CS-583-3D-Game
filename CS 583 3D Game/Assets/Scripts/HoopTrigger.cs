@@ -12,6 +12,7 @@ public class HoopTrigger : MonoBehaviour
     private int score = 0; // Variable to hold the score
     private float timeRemaining; // Variable to track the remaining time
     private bool isGameActive = true; // Flag to check if the game is still active
+    private PauseGame pauseGame;
 
     private void Start()
     {
@@ -19,6 +20,9 @@ public class HoopTrigger : MonoBehaviour
         timeRemaining = gameDuration;
         UpdateScoreText();
         UpdateTimerText();
+
+        // Find PauseGame script
+        pauseGame = FindObjectOfType<PauseGame>();
     }
 
     private void Update()
@@ -91,6 +95,11 @@ public class HoopTrigger : MonoBehaviour
     private void EndGame()
     {
         Debug.Log("Game Over!");
-        // Optional: Implement game over logic (e.g., show Game Over screen, stop spawning basketballs, etc.)
+
+        // Show game over menu and final score
+        if (pauseGame != null)
+        {
+            pauseGame.ShowGameOverMenu(score);
+        }
     }
 }
