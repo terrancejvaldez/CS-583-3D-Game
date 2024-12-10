@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Main.unity
     guid: 7dd028f3ffc887047aeb14bf6aa814fa
   - enabled: 1
-    path: Assets/Basketball Court.unity
+    path: Assets/Scenes/Basketball Court.unity
     guid: 6a5c695cc4c938a4ab4752be3276a7cd
   - enabled: 1
     path: Assets/Scenes/Test.unity

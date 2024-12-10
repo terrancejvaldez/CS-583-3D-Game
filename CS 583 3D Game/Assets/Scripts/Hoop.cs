@@ -21,7 +21,7 @@ public class Hoop : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // Check if the object entering the trigger is tagged as "Basketball"
-        if (other.CompareTag("Basketball") && isGameActive)
+        if ((other.CompareTag("Basketball") || other.CompareTag("Basketball_White") || other.CompareTag("Basketball_Green")) && isGameActive)
         {
             // Destroy the basketball after 5 seconds
             Destroy(other.gameObject, 5f);
@@ -37,7 +37,18 @@ public class Hoop : MonoBehaviour
             }
 
             // Increase the score by 1
-            score++;
+            if (other.CompareTag("Basketball"))
+            {
+                score++;
+            }
+            else if (other.CompareTag("Basketball_White"))
+            {
+                score += 2;
+            }
+            else if (other.CompareTag("Basketball_Green"))
+            {
+                score += 3;
+            }
 
             // Update the score text
             UpdateScoreText();

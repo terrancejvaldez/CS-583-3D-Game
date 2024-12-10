@@ -8,6 +8,8 @@ TagManager:
   - Basketball
   - Backboard
   - Rim
+  - Basketball_Green
+  - Basketball_White
   layers:
   - Default
   - TransparentFX

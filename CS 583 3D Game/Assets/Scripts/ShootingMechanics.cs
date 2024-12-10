@@ -76,7 +76,7 @@ public class ShootingMechanics : MonoBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, pickupRange))
         {
-            if (hit.collider.CompareTag("Basketball"))
+            if (hit.collider.CompareTag("Basketball") || hit.collider.CompareTag("Basketball_White") || hit.collider.CompareTag("Basketball_Green"))
             {
                 GameObject ball = hit.collider.gameObject;
 
