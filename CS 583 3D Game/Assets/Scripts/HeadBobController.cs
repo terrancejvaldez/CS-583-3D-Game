@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//tutorial followed: https://www.youtube.com/watch?v=5MbR2qJK8Tc
+
 public class Headbob : MonoBehaviour
 {
     [Header("Configuration")]

@@ -7,19 +7,21 @@ public class HoopTrigger : MonoBehaviour
     [SerializeField] private ParticleSystem goalEffect; // Assign this in the Inspector
     [SerializeField] private TextMeshProUGUI scoreText; // Reference to TextMeshPro UI to display the score
     [SerializeField] private TextMeshProUGUI timerText; // Reference to TextMeshPro UI to display the timer
-    [SerializeField] private float gameDuration = 60f; // Total time for the game in seconds
+    [SerializeField] private float gameDuration = 70f; // Total time for the game in seconds (1:10)
 
     private int score = 0; // Variable to hold the score
     private float timeRemaining; // Variable to track the remaining time
-    private bool isGameActive = true; // Flag to check if the game is still active
+    private bool isGameActive = false; // Flag to check if the game is active
     private PauseGame pauseGame;
 
     private void Start()
     {
-        // Initialize the timer and score
-        timeRemaining = gameDuration;
-        UpdateScoreText();
+        // Initialize the timer display to show the full game duration
+        timeRemaining = gameDuration - 1f; // Adjust to ensure it displays 1:10
         UpdateTimerText();
+
+        // Initialize the score display
+        UpdateScoreText();
 
         // Find PauseGame script
         pauseGame = FindObjectOfType<PauseGame>();
@@ -39,6 +41,11 @@ public class HoopTrigger : MonoBehaviour
             }
             UpdateTimerText();
         }
+    }
+
+    public void StartGameTimer()
+    {
+        isGameActive = true;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -73,8 +80,6 @@ public class HoopTrigger : MonoBehaviour
                 score += 3;
             }
 
-            
-
             // Update the score text
             UpdateScoreText();
 
@@ -93,7 +98,7 @@ public class HoopTrigger : MonoBehaviour
     }
 
     // Method to update the timer display
-    private void UpdateTimerText()
+    public void UpdateTimerText()
     {
         if (timerText != null)
         {
