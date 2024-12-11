@@ -20,35 +20,43 @@ public class ShootingMechanics : MonoBehaviour
     public Image powerMeterFill; // Added: Reference to the slider's fill image
     public Gradient powerMeterColor; // Added: Gradient to define color changes for the slider
 
+    public HoopTrigger hoopTrigger; // Reference to the HoopTrigger script
+
     private GameObject heldBall = null; // The basketball currently held by the player
     private GameObject highlightedBall = null; // The basketball currently highlighted
     private Material originalMaterial; // To store the original material of the basketball
     private float chargeTime = 0f; // Time the shoot button is held
     private bool isCharging = false; // Whether the player is charging the shot
+    private bool hasStartedTimer = false; // Tracks if the timer has started
 
     void Start()
-{
-    if (interactionText != null)
     {
-        interactionText.gameObject.SetActive(false); // Hide the interaction text initially
-    }
+        if (interactionText != null)
+        {
+            interactionText.gameObject.SetActive(false); // Hide the interaction text initially
+        }
 
-    if (chargeText != null)
-    {
-        chargeText.gameObject.SetActive(false); // Hide the charge text initially
-    }
+        if (chargeText != null)
+        {
+            chargeText.gameObject.SetActive(false); // Hide the charge text initially
+        }
 
-    if (powerMeter != null)
-    {
-        powerMeter.gameObject.SetActive(false); // Hide the power meter initially
-    }
+        if (powerMeter != null)
+        {
+            powerMeter.gameObject.SetActive(false); // Hide the power meter initially
+        }
 
-    if (powerMeterFill != null)
-    {
-        powerMeterFill.color = powerMeterColor.Evaluate(0f); // Set initial color for the fill
-    }
-}
+        if (powerMeterFill != null)
+        {
+            powerMeterFill.color = powerMeterColor.Evaluate(0f); // Set initial color for the fill
+        }
 
+        // Update the timer display to show the default game duration
+        if (hoopTrigger != null)
+        {
+            hoopTrigger.UpdateTimerText();
+        }
+    }
 
     void Update()
     {
@@ -116,103 +124,150 @@ public class ShootingMechanics : MonoBehaviour
     }
 
     private void HandlePickup()
-{
-    if (Input.GetKeyDown(KeyCode.E) && heldBall == null && highlightedBall != null)
     {
-        heldBall = highlightedBall;
-        Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
-        ballRigidbody.isKinematic = true;
-        heldBall.transform.SetParent(null);
-
-        RemoveHighlight();
-
-        // Activate the charge text and power meter when the player picks up the ball
-        if (chargeText != null)
+        if (Input.GetKeyDown(KeyCode.E) && heldBall == null && highlightedBall != null)
         {
-            chargeText.gameObject.SetActive(true);
-        }
+            heldBall = highlightedBall;
+            Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
+            ballRigidbody.isKinematic = true;
+            heldBall.transform.SetParent(null);
 
-        if (powerMeter != null)
-        {
-            powerMeter.gameObject.SetActive(true); // Make the power meter visible
-            powerMeter.value = 0f; // Reset the power meter slider to 0
-        }
+            RemoveHighlight();
 
-        if (powerMeterFill != null)
-        {
-            powerMeterFill.color = powerMeterColor.Evaluate(0f); // Reset the fill color to the starting color
-        }
+            // Activate the charge text and power meter when the player picks up the ball
+            if (chargeText != null)
+            {
+                chargeText.gameObject.SetActive(true);
+            }
 
-        if (interactionText != null)
-        {
-            interactionText.gameObject.SetActive(false); // Hide the interaction text
-        }
-    }
-}
+            if (powerMeter != null)
+            {
+                powerMeter.gameObject.SetActive(true); // Make the power meter visible
+                powerMeter.value = 0f; // Reset the power meter slider to 0
+            }
 
+            if (powerMeterFill != null)
+            {
+                powerMeterFill.color = powerMeterColor.Evaluate(0f); // Reset the fill color to the starting color
+            }
 
+            if (interactionText != null)
+            {
+                interactionText.gameObject.SetActive(false); // Hide the interaction text
+            }
 
-private void HandleChargeAndShoot()
-{
-    if (heldBall == null) return;
-
-    // Only proceed if the player is holding a ball
-    if (Input.GetKeyDown(KeyCode.F))
-    {
-        chargeTime = 0f;
-        isCharging = true;
-    }
-
-    if (Input.GetKey(KeyCode.F) && isCharging)
-    {
-        chargeTime += Time.deltaTime;
-        chargeTime = Mathf.Clamp(chargeTime, 0f, maxChargeTime);
-
-        if (chargeText != null)
-        {
-            float chargePercentage = (chargeTime / maxChargeTime) * 100f;
-            chargeText.text = $"Charge: {chargePercentage:0}%";
-        }
-
-        if (powerMeter != null)
-        {
-            powerMeter.value = chargeTime / maxChargeTime; // Update slider value
-        }
-
-        if (powerMeterFill != null)
-        {
-            powerMeterFill.color = powerMeterColor.Evaluate(chargeTime / maxChargeTime); // Update slider fill color
+            // Start the game timer only when the first ball is picked up
+            if (!hasStartedTimer && hoopTrigger != null)
+            {
+                hoopTrigger.StartGameTimer();
+                hasStartedTimer = true;
+            }
         }
     }
 
-    if (Input.GetKeyUp(KeyCode.F) && isCharging)
+    private void HandleChargeAndShoot()
     {
-        float chargeRatio = chargeTime / maxChargeTime;
-        float shootForce = Mathf.Lerp(minShootForce, maxShootForce, chargeRatio);
+        if (heldBall == null) return;
 
-        Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
-        ballRigidbody.isKinematic = false;
-
-        Vector3 shootDirection = playerCamera.transform.forward + Vector3.up * 0.5f;
-        ballRigidbody.AddForce(shootDirection.normalized * shootForce, ForceMode.Impulse);
-
-        ballRigidbody.AddTorque(playerCamera.transform.right * 10f, ForceMode.Impulse);
-
-        heldBall = null;
-        isCharging = false;
-
-        // Hide the charge text and power meter when the ball is released
-        if (chargeText != null)
+        // Start charging the shot
+        if (Input.GetKeyDown(KeyCode.F))
         {
-            chargeText.gameObject.SetActive(false);
+            chargeTime = 0f;
+            isCharging = true;
+
+            // Ensure the power meter and charge text are visible when starting to charge
+            if (chargeText != null)
+            {
+                chargeText.gameObject.SetActive(true);
+            }
+
+            if (powerMeter != null)
+            {
+                powerMeter.gameObject.SetActive(true);
+                powerMeter.value = 0f; // Reset the power meter slider to 0
+            }
+
+            if (powerMeterFill != null)
+            {
+                powerMeterFill.color = powerMeterColor.Evaluate(0f); // Reset the fill color to the starting color
+            }
         }
 
-        if (powerMeter != null)
+        // Update the charge while holding the button
+        if (Input.GetKey(KeyCode.F) && isCharging)
         {
-            powerMeter.gameObject.SetActive(false); // Hide the power meter
+            chargeTime += Time.deltaTime;
+            chargeTime = Mathf.Clamp(chargeTime, 0f, maxChargeTime);
+
+            if (chargeText != null)
+            {
+                float chargePercentage = (chargeTime / maxChargeTime) * 100f;
+                chargeText.text = $"Charge: {chargePercentage:0}%";
+            }
+
+            if (powerMeter != null)
+            {
+                powerMeter.value = chargeTime / maxChargeTime; // Update slider value
+            }
+
+            if (powerMeterFill != null)
+            {
+                powerMeterFill.color = powerMeterColor.Evaluate(chargeTime / maxChargeTime); // Update slider fill color
+            }
+        }
+
+        // Cancel the shot when the left mouse button is clicked
+        if (Input.GetMouseButtonDown(0) && isCharging)
+        {
+            isCharging = false;
+            chargeTime = 0f;
+
+            if (chargeText != null)
+            {
+                chargeText.gameObject.SetActive(false);
+            }
+
+            if (powerMeter != null)
+            {
+                powerMeter.gameObject.SetActive(false);
+                powerMeter.value = 0f; // Reset the power meter slider to 0
+            }
+
+            if (powerMeterFill != null)
+            {
+                powerMeterFill.color = powerMeterColor.Evaluate(0f); // Reset the fill color to the starting color
+            }
+        }
+
+        // Shoot the ball when the key is released
+        if (Input.GetKeyUp(KeyCode.F) && isCharging)
+        {
+            float chargeRatio = chargeTime / maxChargeTime;
+            float shootForce = Mathf.Lerp(minShootForce, maxShootForce, chargeRatio);
+
+            Rigidbody ballRigidbody = heldBall.GetComponent<Rigidbody>();
+            ballRigidbody.isKinematic = false;
+
+            Vector3 shootDirection = playerCamera.transform.forward + Vector3.up * 0.5f;
+            ballRigidbody.AddForce(shootDirection.normalized * shootForce, ForceMode.Impulse);
+
+            ballRigidbody.AddTorque(playerCamera.transform.right * 10f, ForceMode.Impulse);
+
+            heldBall = null;
+            isCharging = false;
+
+            // Hide the charge text and power meter when the ball is released
+            if (chargeText != null)
+            {
+                chargeText.gameObject.SetActive(false);
+            }
+
+            if (powerMeter != null)
+            {
+                powerMeter.gameObject.SetActive(false); // Hide the power meter
+            }
         }
     }
-}
 
     private void UpdateHeldBallPosition()
     {
