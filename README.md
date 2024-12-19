@@ -12,7 +12,7 @@ Michael Zalameda: Animate the player’s shooting motions. Smooth transitions wh
 
 Jett Morgan: Track and display scores in real-time based on 1-point normal balls and 2-point money balls. Add a countdown timer visible to the player. Display instructions and results at the start and end of the game.
 
-Alan Yin: Create particle effects for successful shots, like glowing trails for money balls. Add sounds for ball bounce, swishes, and crowd cheers. Implement a distinct sound effect for money ball shots.
+Alan Yin: Create 2 new game modes that are based on the original game. One as a free shooting basketball game where there is not a timer and only count your points. The other as only one ball and create an enemy which chase the ball and after it has been within a certain radius of the ball for a short time, you lose. Create a pause menu and a main menu which player can use to choose the game they want to go to or exit game, and use the pause menu in case they want to go back to main menu.
 
 Ethan Fox Goals: Implement controls for shooting, including aiming and shot power adjustment. Add realistic physics-based basketball trajectories. Ensure smooth transition from one rack to the next after completing 5 shots. Generally been working towards getting the game to be in a "prototype version", mainly working on core functions such as ball physics (bled into ball handling), colliders with the hoops, and very basic audio mechanics for playtesting. 
 
